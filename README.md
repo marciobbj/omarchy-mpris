@@ -18,9 +18,12 @@ right sections; centered placement still needs layout cooperation from the
 host. If even the compact control cannot fit, the widget temporarily hides
 until space is available again.
 
-It works with Spotify and other Linux media players that expose the standard
-MPRIS interface. The widget uses Quickshell's MPRIS service directly: it does
-not poll `playerctl`, download cover art into `/tmp`, or depend on the old
+It works with Spotify, MPD, and other Linux media players. Players that expose
+the standard MPRIS interface are detected automatically via Quickshell's MPRIS
+service. MPD is supported natively: the widget talks to MPD through `mpc`, so
+no MPRIS bridge (such as `mpd-mpris` or `mpDris2`) is required. When both an
+MPRIS player and MPD are active, the MPRIS player takes priority. The widget
+does not poll `playerctl`, download cover art into `/tmp`, or depend on the old
 Waybar scripts.
 
 ## Install
@@ -33,10 +36,13 @@ omarchy bar move crmne.mpris --section right --before omarchy.tray
 ## Requirements
 
 - Omarchy Quattro with its Quickshell-based shell.
-- At least one media player exposing the standard MPRIS interface.
+- At least one media player exposing the standard MPRIS interface, or MPD.
+- `mpc` (optional, required only for native MPD support). The `MPD_HOST` and
+  `MPD_PORT` environment variables are respected.
 
-There are no additional packages or helper scripts. In particular, this plugin
-uses Quickshell's MPRIS service directly and does not require `playerctl`.
+There are no additional packages or helper scripts for MPRIS players. In
+particular, this plugin uses Quickshell's MPRIS service directly and does not
+require `playerctl`.
 
 ## Remove
 

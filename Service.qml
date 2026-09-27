@@ -12,12 +12,14 @@ Item {
   readonly property var sourcePlayers: availablePlayers()
   readonly property var activePlayer: chooseActivePlayer()
   readonly property bool hasMedia: activePlayer !== null
-    && activePlayer.playbackState !== MprisPlaybackState.Stopped
+    && !isStopped(activePlayer)
     && hasTrack(activePlayer)
   readonly property string title: activePlayer ? String(activePlayer.trackTitle || "") : ""
   readonly property string artist: activePlayer ? String(activePlayer.trackArtist || "") : ""
   readonly property string album: activePlayer ? String(activePlayer.trackAlbum || "") : ""
   readonly property string artUrl: activePlayer ? String(activePlayer.trackArtUrl || "") : ""
+
+  MpdSource { id: mpdSource }
 
   function playerKey(player) {
     if (!player) return ""
@@ -35,12 +37,22 @@ Item {
     return !!(player && (player.trackTitle || player.trackArtist || player.trackArtUrl))
   }
 
+  function isStopped(player) {
+    if (!player) return true
+    // MpdSource exposes a boolean; MPRIS players expose the enum.
+    if (player === mpdSource) return mpdSource._stopped
+    return player.playbackState === MprisPlaybackState.Stopped
+  }
+
   function isAvailable(player) {
-    return !!(player && player.playbackState !== MprisPlaybackState.Stopped && hasTrack(player))
+    return !!(player && !isStopped(player) && hasTrack(player))
   }
 
   function availablePlayers() {
     var result = []
+    // Insert the MPD source first: a dedicated music player should take
+    // priority over incidental MPRIS sources such as browsers.
+    if (isAvailable(mpdSource)) result.push(mpdSource)
     for (var i = 0; i < players.length; i++) {
       if (isAvailable(players[i])) result.push(players[i])
     }
